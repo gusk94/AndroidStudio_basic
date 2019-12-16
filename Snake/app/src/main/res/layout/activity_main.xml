@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:background="#ffbbccdd"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/time"
+                android:textColor="#ff0000ff"
+                android:textSize="20sp"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/score"
+                android:textColor="#ff0000ff"
+                android:textSize="20sp"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/speed"
+                android:textColor="#ff0000ff"
+                android:textSize="20sp"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_weight="7"
+            android:background="#ff000000"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.example.snake.SnakeView
+                android:id="@+id/snake"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tileSize="24"
+                />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:id="@+id/text"
+                    android:text="@string/snake_layout_text_text"
+                    android:visibility="visible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:gravity="center_horizontal"
+                    android:textColor="#ff8888ff"
+                    android:textSize="24sp"/>
+            </RelativeLayout>
+        </FrameLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#ff000000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:text="▲"
+                android:id="@+id/up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onUpClicked" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/left"
+                    android:text="◀"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onLeftClicked" />
+                <Button
+                    android:id="@+id/down"
+                    android:text="▼"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onDownClicked" />
+                <Button
+                    android:id="@+id/right"
+                    android:text="▶"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onRightClicked" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
