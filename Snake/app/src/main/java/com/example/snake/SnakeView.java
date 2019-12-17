@@ -21,75 +21,57 @@ public class SnakeView extends TileView{
 
     private static final String TAG = "SnakeView";
 
-    /**
-     * Current mode of application: READY to run, RUNNING, or you have already
-     * lost. static final ints are used instead of an enum for performance
-     * reasons.
-     */
+
+    // 현재 상태
     private boolean isStart = false;
-    private int mMode = READY;
+    private int mode = READY;
     public static final int PAUSE = 0;
     public static final int READY = 1;
     public static final int RUNNING = 2;
     public static final int LOSE = 3;
 
-    /**
-     * Current direction the snake is headed.
-     */
-    private int mGameTime = 0;
-    private int mDirection = NORTH;
-    private int mNextDirection = NORTH;
+    // 방향
+    private int gameTime = 0;
+    private int direction = NORTH;
+    private int nextDirection = NORTH;
     private static final int NORTH = 1;
     private static final int SOUTH = 2;
     private static final int EAST = 3;
     private static final int WEST = 4;
 
-    /**
-     * Labels for the drawables that will be loaded into the TileView class
-     */
+
+    // TileView 로 전해질 변수
     private static final int RED_STAR = 1;
     private static final int YELLOW_STAR = 2;
     private static final int GREEN_STAR = 3;
 
-    /**
-     * mScore: used to track the number of apples captured mMoveDelay: number of
-     * milliseconds between snake movements. This will decrease as apples are
-     * captured.
-     */
-    private long mScore = 0;
-    private long mMoveDelay = 200;
-    /**
-     * mLastMove: tracks the absolute time when the snake last moved, and is used
-     * to determine if a move should be made based on mMoveDelay.
-     */
-    private long mLastMove;
 
-    /**
-     * mStatusText: text shows to the user in some run states
-     */
-    private TextView mStatusText;
-    private TextView mTextTime;
-    private TextView mTextScore;
-    private TextView mTextSpeed;
+    // score : 사과를 얼마나 먹었는지
+    private long score = 0;
+    // moveDelay : milliseconds 단위, 사과를 먹을수록 줄어들도록 함
+    private long moveDelay = 200;
+    // 마지막으로 움직인 절대시간 / moveDelay 에 기초했는지 판단
+    private long lastMove;
 
-    /**
-     * mSnakeTrail: a list of Coordinates that make up the snake's body
-     * mAppleList: the secret location of the juicy apples the snake craves.
-     */
-    private ArrayList<Coordinate> mSnakeTrail = new ArrayList<Coordinate>();
-    private ArrayList<Coordinate> mAppleList = new ArrayList<Coordinate>();
+    // user
+    private TextView statusText;
+    private TextView textTime;
+    private TextView textScore;
+    private TextView textSpeed;
 
-    /**
-     * Everyone needs a little randomness in their life
-     */
+
+    // 뱀과 사과의 위치
+    private ArrayList<Coordinate> snakeTrail = new ArrayList<Coordinate>();
+    private ArrayList<Coordinate> appleList = new ArrayList<Coordinate>();
+
+
     private static final Random RNG = new Random();
 
-    /**
-     * Create a simple handler that we can use to cause animation to happen.  We
-     * set ourselves as a target and we can use the sleep()
-     * function to cause an update/invalidate to occur at a later date.
-     */
-    private RefreshHandler mRedrawHandler = new RefreshHandler();
+    // Thread : 프로그램 안에서 실행을 담당하는 하나의 흐름
+    // MessageQueue : Message 를 담는 자료구조
+    // Looper : MessageQueue -> Handler
+    // 일어날 사건을 만들수 있는 handler(Thread 간의 통신 장치)
+    private RefreshHandler redrawHandler = new RefreshHandler();
 
     class RefreshHandler extends Handler {
 
@@ -105,28 +87,23 @@ public class SnakeView extends TileView{
         }
     };
 
-    Handler mHandler = new Handler() {
+    Handler snakeHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            int hh = mGameTime / 3600;
-            int mm = (mGameTime % 3600) / 60;
-            int sec = mGameTime % 60;
+            int hh = gameTime / 3600;
+            int mm = (gameTime % 3600) / 60;
+            int sec = gameTime % 60;
 
             String strTime = String.format("%02d : %02d : %02d", hh, mm, sec);
             sendEmptyMessageDelayed(0, 1000);
-            mTextTime.setText(strTime);
-            mGameTime++;
+            textTime.setText(strTime);
+            gameTime++;
         }
     };
 
-
-    /**
-     * Constructs a SnakeView based on inflation from XML
-     *
-     * @param context
-     * @param attrs
-     */
+    // xml 파일에 기초해 Snake View 구성
+    // Custom View
     public SnakeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initSnakeView();
@@ -152,44 +129,35 @@ public class SnakeView extends TileView{
 
 
     private void initNewGame() {
-        mSnakeTrail.clear();
-        mAppleList.clear();
+        snakeTrail.clear();
+        appleList.clear();
 
-        // For now we're just going to load up a short default eastbound snake
-        // that's just turned north
+        // Initial Snake
+        snakeTrail.add(new Coordinate(7, 7));
+        snakeTrail.add(new Coordinate(6, 7));
+        snakeTrail.add(new Coordinate(5, 7));
+        snakeTrail.add(new Coordinate(4, 7));
+        snakeTrail.add(new Coordinate(3, 7));
+        snakeTrail.add(new Coordinate(2, 7));
+        nextDirection = NORTH;
 
-
-        mSnakeTrail.add(new Coordinate(7, 7));
-        mSnakeTrail.add(new Coordinate(6, 7));
-        mSnakeTrail.add(new Coordinate(5, 7));
-        mSnakeTrail.add(new Coordinate(4, 7));
-        mSnakeTrail.add(new Coordinate(3, 7));
-        mSnakeTrail.add(new Coordinate(2, 7));
-        mNextDirection = NORTH;
-
-        // Two apples to start with
+        // Initial Apple
         addRandomApple();
         addRandomApple();
 
-        mMoveDelay = 200;
-        mScore = 0;
+        moveDelay = 200;
+        score = 0;
     }
 
     public void setTextView(TextView time, TextView score, TextView speed) {
-        mTextTime = time;
-        mTextScore = score;
-        mTextSpeed = speed;
+        textTime = time;
+        textScore = score;
+        textSpeed = speed;
     }
 
 
-    /**
-     * Given a ArrayList of coordinates, we need to flatten them into an array of
-     * ints before we can stuff them into a map for flattening and storage.
-     *
-     * @param cvec : a ArrayList of Coordinate objects
-     * @return : a simple array containing the x/y values of the coordinates
-     * as [x1,y1,x2,y2,x3,y3...]
-     */
+    // 위치를 평면화 시키기 위한 함수 -> return : [x, y] 의 리스트
+    // cvec : 2차원 좌표
     private int[] coordArrayListToArray(ArrayList<Coordinate> cvec) {
         int count = cvec.size();
         int[] rawArray = new int[count * 2];
@@ -201,34 +169,24 @@ public class SnakeView extends TileView{
         return rawArray;
     }
 
-    /**
-     * Save game state so that the user does not lose anything
-     * if the game process is killed while we are in the
-     * background.
-     *
-     * @return a Bundle with this view's state
-     */
+
+    // 게임 정보 저장
     public Bundle saveState() {
         Bundle map = new Bundle();
 
-        map.putIntArray("mAppleList", coordArrayListToArray(mAppleList));
-        map.putInt("mDirection", Integer.valueOf(mDirection));
-        map.putInt("mNextDirection", Integer.valueOf(mNextDirection));
-        map.putLong("mMoveDelay", Long.valueOf(mMoveDelay));
-        map.putLong("mScore", Long.valueOf(mScore));
-        map.putInt("mGameTime", Integer.valueOf(mGameTime));
-        map.putIntArray("mSnakeTrail", coordArrayListToArray(mSnakeTrail));
+        map.putIntArray("appleList", coordArrayListToArray(appleList));
+        map.putInt("direction", Integer.valueOf(direction));
+        map.putInt("nextDirection", Integer.valueOf(nextDirection));
+        map.putLong("moveDelay", Long.valueOf(moveDelay));
+        map.putLong("score", Long.valueOf(score));
+        map.putInt("gameTime", Integer.valueOf(gameTime));
+        map.putIntArray("snakeTrail", coordArrayListToArray(snakeTrail));
 
         return map;
     }
 
-    /**
-     * Given a flattened array of ordinate pairs, we reconstitute them into a
-     * ArrayList of Coordinate objects
-     *
-     * @param rawArray : [x1,y1,x2,y2,...]
-     * @return a ArrayList of Coordinates
-     */
+
+    // 평면화된 좌표를 다시 이차원상으로 구축
     private ArrayList<Coordinate> coordArrayToArrayList(int[] rawArray) {
         ArrayList<Coordinate> coordArrayList = new ArrayList<Coordinate>();
 
@@ -240,32 +198,21 @@ public class SnakeView extends TileView{
         return coordArrayList;
     }
 
-    /**
-     * Restore game state if our process is being relaunched
-     *
-     * @param icicle a Bundle containing the game state
-     */
+
+    // 게임 정보 다시 불러오기
     public void restoreState(Bundle icicle) {
         setMode(PAUSE);
 
-        mAppleList = coordArrayToArrayList(icicle.getIntArray("mAppleList"));
-        mDirection = icicle.getInt("mDirection");
-        mNextDirection = icicle.getInt("mNextDirection");
-        mMoveDelay = icicle.getLong("mMoveDelay");
-        mScore = icicle.getLong("mScore");
-        mGameTime = icicle.getInt("mGameTime");
-        mSnakeTrail = coordArrayToArrayList(icicle.getIntArray("mSnakeTrail"));
+        appleList = coordArrayToArrayList(icicle.getIntArray("appleList"));
+        direction = icicle.getInt("direction");
+        nextDirection = icicle.getInt("nextDirection");
+        moveDelay = icicle.getLong("moveDelay");
+        score = icicle.getLong("score");
+        gameTime = icicle.getInt("gameTime");
+        snakeTrail = coordArrayToArrayList(icicle.getIntArray("snakeTrail"));
     }
 
-    /*
-     * handles key events in the game. Update the direction our snake is traveling
-     * based on the DPAD. Ignore events that would cause the snake to immediately
-     * turn back on itself.
-     *
-     * (non-Javadoc)
-     *
-     * @see android.view.View#onKeyDown(int, android.os.KeyEvent)
-     */
+    // Key Down Event
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent msg) {
 
@@ -294,86 +241,69 @@ public class SnakeView extends TileView{
 
     public void processKey(int dir) {
         if (dir == NORTH) {
-            if (mMode == READY | mMode == LOSE) {
-                /*
-                 * At the beginning of the game, or the end of a previous one,
-                 * we should start a new game.
-                 */
+            if (mode == READY | mode == LOSE) {
                 initNewGame();
                 setMode(RUNNING);
                 update();
                 if(isStart == false) {
                     isStart = true;
-                    mHandler.sendEmptyMessage(0);
-                    mTextScore.setText("Score : " + mScore);
-                    mTextSpeed.setText("Delay : " + mMoveDelay);
+                    snakeHandler.sendEmptyMessage(0);
+                    textScore.setText("Score : " + score);
+                    textSpeed.setText("Delay : " + moveDelay);
                 }
                 return;
             }
 
-            if (mMode == PAUSE) {
-                /*
-                 * If the game is merely paused, we should just continue where
-                 * we left off.
-                 */
+            if (mode == PAUSE) {
                 setMode(RUNNING);
                 update();
                 if(isStart == false) {
                     isStart = true;
-                    mHandler.sendEmptyMessage(0);
-                    mTextScore.setText("Score : " + mScore);
-                    mTextSpeed.setText("Delay : " + mMoveDelay);
+                    snakeHandler.sendEmptyMessage(0);
+                    textScore.setText("Score : " + score);
+                    textSpeed.setText("Delay : " + moveDelay);
                 }
                 return;
             }
 
-            if (mDirection != SOUTH) {
-                mNextDirection = NORTH;
+            if (direction != SOUTH) {
+                nextDirection = NORTH;
                 return;
             }
         }
 
         if (dir == SOUTH) {
-            if (mDirection != NORTH) {
-                mNextDirection = SOUTH;
+            if (direction != NORTH) {
+                nextDirection = SOUTH;
             }
         }
 
         if (dir == WEST) {
-            if (mDirection != EAST) {
-                mNextDirection = WEST;
+            if (direction != EAST) {
+                nextDirection = WEST;
             }
         }
 
         if (dir == EAST) {
-            if (mDirection != WEST) {
-                mNextDirection = EAST;
+            if (direction != WEST) {
+                nextDirection = EAST;
             }
         }
     }
 
-    /**
-     * Sets the TextView that will be used to give information (such as "Game
-     * Over" to the user.
-     *
-     * @param newView
-     */
+
     public void setTextView(TextView newView) {
-        mStatusText = newView;
+        statusText = newView;
     }
 
-    /**
-     * Updates the current mode of the application (RUNNING or PAUSED or the like)
-     * as well as sets the visibility of textview for notification
-     *
-     * @param newMode
-     */
+
+    // 게임 모드에 따른 설정
     public void setMode(int newMode) {
-        int oldMode = mMode;
-        mMode = newMode;
+        int oldMode = mode;
+        mode = newMode;
 
         if (newMode == RUNNING & oldMode != RUNNING) {
-            mStatusText.setVisibility(View.INVISIBLE);
+            statusText.setVisibility(View.INVISIBLE);
             update();
             return;
         }
@@ -383,7 +313,7 @@ public class SnakeView extends TileView{
         if (newMode == PAUSE) {
             str = res.getText(R.string.mode_pause);
             if(isStart) {
-                mHandler.removeMessages(0);
+                snakeHandler.removeMessages(0);
                 isStart = false;
             }
         }
@@ -391,96 +321,78 @@ public class SnakeView extends TileView{
             str = res.getText(R.string.mode_ready);
         }
         if (newMode == LOSE) {
-            str = res.getString(R.string.mode_lose_prefix) + mScore
+            str = res.getString(R.string.mode_lose_prefix) + score
                     + res.getString(R.string.mode_lose_suffix);
             if(isStart) {
-                mHandler.removeMessages(0);
+                snakeHandler.removeMessages(0);
                 isStart = false;
-                mGameTime = 0;
+                gameTime = 0;
             }
         }
 
-        mStatusText.setText(str);
-        mStatusText.setVisibility(View.VISIBLE);
+        statusText.setText(str);
+        statusText.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Selects a random location within the garden that is not currently covered
-     * by the snake. Currently _could_ go into an infinite loop if the snake
-     * currently fills the garden, but we'll leave discovery of this prize to a
-     * truly excellent snake-player.
-     *
-     */
+
     private void addRandomApple() {
         Coordinate newCoord = null;
         boolean found = false;
         while (!found) {
-            // Choose a new location for our apple
-            int newX = 1 + RNG.nextInt(mXTileCount - 2);
-            int newY = 1 + RNG.nextInt(mYTileCount - 2);
+            // 새로운 위치
+            int newX = 1 + RNG.nextInt(xTileCount - 2);
+            int newY = 1 + RNG.nextInt(yTileCount - 2);
             newCoord = new Coordinate(newX, newY);
 
-            // Make sure it's not already under the snake
+            // 뱀과 겹치지 x
             boolean collision = false;
-            int snakelength = mSnakeTrail.size();
+            int snakelength = snakeTrail.size();
             for (int index = 0; index < snakelength; index++) {
-                if (mSnakeTrail.get(index).equals(newCoord)) {
+                if (snakeTrail.get(index).equals(newCoord)) {
                     collision = true;
                 }
             }
-            // if we're here and there's been no collision, then we have
-            // a good location for an apple. Otherwise, we'll circle back
-            // and try again
+            // 충돌이 나지 않을 경우 탈출
             found = !collision;
         }
         if (newCoord == null) {
             Log.e(TAG, "Somehow ended up with a null newCoord!");
         }
-        mAppleList.add(newCoord);
+        appleList.add(newCoord);
     }
 
 
-    /**
-     * Handles the basic update loop, checking to see if we are in the running
-     * state, determining if a move should be made, updating the snake's location.
-     */
+    // game mode 와, 움직임이 실제로 일어났는지를 확인해 뱀의 위치를 새로 지정
     public void update() {
-        if (mMode == RUNNING) {
+        if (mode == RUNNING) {
             long now = System.currentTimeMillis();
 
-            if (now - mLastMove > mMoveDelay) {
+            if (now - lastMove > moveDelay) {
                 clearTiles();
                 updateWalls();
                 updateSnake();
                 updateApples();
-                mLastMove = now;
+                lastMove = now;
             }
-            mRedrawHandler.sleep(mMoveDelay);
+            redrawHandler.sleep(moveDelay);
         }
 
     }
 
-    /**
-     * Draws some walls.
-     *
-     */
+
     private void updateWalls() {
-        for (int x = 0; x < mXTileCount; x++) {
+        for (int x = 0; x < xTileCount; x++) {
             setTile(GREEN_STAR, x, 0);
-            setTile(GREEN_STAR, x, mYTileCount- 1);
+            setTile(GREEN_STAR, x, yTileCount- 1);
         }
-        for (int y = 1; y < mYTileCount - 1; y++) {
+        for (int y = 1; y < xTileCount - 1; y++) {
             setTile(GREEN_STAR, 0, y);
-            setTile(GREEN_STAR, mXTileCount - 1, y);
+            setTile(GREEN_STAR, yTileCount - 1, y);
         }
     }
 
-    /**
-     * Draws some apples.
-     *
-     */
     private void updateApples() {
-        for (Coordinate c : mAppleList) {
+        for (Coordinate c : appleList) {
             setTile(YELLOW_STAR, c.x, c.y);
         }
     }
@@ -492,16 +404,17 @@ public class SnakeView extends TileView{
      * grow him, we don't subtract from the rear.
      *
      */
+    // 뱀 위치 변경 : 만약 죽지 않았다면, 뒤 하나의 위치를 앞으로 옮김, 만약 사과를 먹었다면 옮기지 x
     private void updateSnake() {
         boolean growSnake = false;
 
-        // grab the snake by the head
-        Coordinate head = mSnakeTrail.get(0);
+        // head, newHead 지정
+        Coordinate head = snakeTrail.get(0);
         Coordinate newHead = new Coordinate(1, 1);
 
-        mDirection = mNextDirection;
+        direction = nextDirection;
 
-        switch (mDirection) {
+        switch (direction) {
             case EAST: {
                 newHead = new Coordinate(head.x + 1, head.y);
                 break;
@@ -520,53 +433,51 @@ public class SnakeView extends TileView{
             }
         }
 
-        // Collision detection
-        // For now we have a 1-square wall around the entire arena
-        if ((newHead.x < 1) || (newHead.y < 1) || (newHead.x > mXTileCount - 2)
-                || (newHead.y > mYTileCount - 2)) {
+        // 충돌
+        if ((newHead.x < 1) || (newHead.y < 1) || (newHead.x > xTileCount - 2)
+                || (newHead.y > yTileCount - 2)) {
             setMode(LOSE);
             return;
 
         }
 
-        // Look for collisions with itself
-        int snakelength = mSnakeTrail.size();
+        // 뱀이 자신의 몸에 닿을 경우
+        int snakelength = snakeTrail.size();
         for (int snakeindex = 0; snakeindex < snakelength; snakeindex++) {
-            Coordinate c = mSnakeTrail.get(snakeindex);
+            Coordinate c = snakeTrail.get(snakeindex);
             if (c.equals(newHead)) {
                 setMode(LOSE);
                 return;
             }
         }
 
-        // Look for apples
-        int applecount = mAppleList.size();
+        // eat apple
+        int applecount = appleList.size();
         for (int appleindex = 0; appleindex < applecount; appleindex++) {
-            Coordinate c = mAppleList.get(appleindex);
+            Coordinate c = appleList.get(appleindex);
             if (c.equals(newHead)) {
-                mAppleList.remove(c);
+                appleList.remove(c);
                 addRandomApple();
 
-                mScore++;
-                if(mMoveDelay > 50) {
-                    mMoveDelay -= 1;
+                score++;
+                if(moveDelay > 50) {
+                    moveDelay -= 1;
                 }
-                mTextScore.setText("Score : " + mScore);
-                mTextSpeed.setText("Delay : " + mMoveDelay);
+                textScore.setText("Score : " + score);
+                textSpeed.setText("Delay : " + moveDelay);
 
                 growSnake = true;
             }
         }
 
-        // push a new head onto the ArrayList and pull off the tail
-        mSnakeTrail.add(0, newHead);
-        // except if we want the snake to grow
+        // 뱀 위치 조정
+        snakeTrail.add(0, newHead);
         if (!growSnake) {
-            mSnakeTrail.remove(mSnakeTrail.size() - 1);
+            snakeTrail.remove(snakeTrail.size() - 1);
         }
 
         int index = 0;
-        for (Coordinate c : mSnakeTrail) {
+        for (Coordinate c : snakeTrail) {
             if (index == 0) {
                 setTile(YELLOW_STAR, c.x, c.y);
             } else {
@@ -577,12 +488,8 @@ public class SnakeView extends TileView{
 
     }
 
-    /**
-     * Simple class containing two integer values and a comparison function.
-     * There's probably something I should use instead, but this was quick and
-     * easy to build.
-     *
-     */
+
+    // x, y 로 이차원 배열을 만드는 간단한 class
     private class Coordinate {
         public int x;
         public int y;

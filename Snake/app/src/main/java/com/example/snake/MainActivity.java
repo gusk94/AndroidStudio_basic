@@ -10,10 +10,10 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
 
-    private SnakeView mSnakeView;
-    private TextView mTime;
-    private TextView mScore;
-    private TextView mSpeed;
+    private SnakeView snakeView;
+    private TextView time;
+    private TextView score;
+    private TextView speed;
 
     private static String ICICLE_KEY = "snake-view";
 
@@ -26,27 +26,25 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        mTime = findViewById(R.id.time);
-        mScore = findViewById(R.id.score);
-        mSpeed = findViewById(R.id.speed);
+        time = findViewById(R.id.time);
+        score = findViewById(R.id.score);
+        speed = findViewById(R.id.speed);
 
-        mSnakeView = findViewById(R.id.snake);
-        mSnakeView.setTextView((TextView) findViewById(R.id.text));
-        mTime.setText("00 : 00 : 00");
-        mScore.setText("Score : " + 0);
-        mSpeed.setText("Delay : " + 0);
-        mSnakeView.setTextView(mTime, mScore, mSpeed);
+        snakeView = findViewById(R.id.snake);
+        snakeView.setTextView((TextView) findViewById(R.id.text));
+        time.setText("00 : 00 : 00");
+        score.setText("Score : " + 0);
+        speed.setText("Delay : " + 0);
+        snakeView.setTextView(time, score, speed);
 
         if (savedInstanceState == null) {
-            // We were just launched -- set up a new game
-            mSnakeView.setMode(SnakeView.READY);
+            snakeView.setMode(SnakeView.READY);
         } else {
-            // We are being restored
             Bundle map = savedInstanceState.getBundle(ICICLE_KEY);
             if (map != null) {
-                mSnakeView.restoreState(map);
+                snakeView.restoreState(map);
             } else {
-                mSnakeView.setMode(SnakeView.PAUSE);
+                snakeView.setMode(SnakeView.PAUSE);
             }
         }
     }
@@ -54,31 +52,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Pause the game along with the activity
-        mSnakeView.setMode(SnakeView.PAUSE);
+        snakeView.setMode(SnakeView.PAUSE);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        //Store the game state
         super.onSaveInstanceState(outState);
-        outState.putBundle(ICICLE_KEY, mSnakeView.saveState());
+        outState.putBundle(ICICLE_KEY, snakeView.saveState());
     }
 
     public void onUpClicked(View v) {
-        mSnakeView.processKey(1);
+        snakeView.processKey(1);
     }
 
     public void onDownClicked(View v) {
-        mSnakeView.processKey(2);
+        snakeView.processKey(2);
     }
 
     public void onRightClicked(View v) {
-        mSnakeView.processKey(3);
+        snakeView.processKey(3);
     }
 
     public void onLeftClicked(View v) {
-        mSnakeView.processKey(4);
+        snakeView.processKey(4);
     }
 
 }
