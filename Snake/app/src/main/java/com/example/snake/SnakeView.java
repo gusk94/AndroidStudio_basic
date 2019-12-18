@@ -301,7 +301,6 @@ public class SnakeView extends TileView{
     public void setMode(int newMode) {
         int oldMode = mode;
         mode = newMode;
-
         if (newMode == RUNNING & oldMode != RUNNING) {
             statusText.setVisibility(View.INVISIBLE);
             update();
@@ -397,13 +396,7 @@ public class SnakeView extends TileView{
         }
     }
 
-    /**
-     * Figure out which way the snake is going, see if he's run into anything (the
-     * walls, himself, or an apple). If he's not going to die, we then add to the
-     * front and subtract from the rear in order to simulate motion. If we want to
-     * grow him, we don't subtract from the rear.
-     *
-     */
+
     // 뱀 위치 변경 : 만약 죽지 않았다면, 뒤 하나의 위치를 앞으로 옮김, 만약 사과를 먹었다면 옮기지 x
     private void updateSnake() {
         boolean growSnake = false;

@@ -10,11 +10,6 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class TileView extends View {
-    /**
-     * Parameters controlling the size of the tiles and their range within view.
-     * Width/Height are in pixels, and Drawables will be scaled to fit to these
-     * dimensions. X/Y Tile Counts are the number of tiles that will be drawn.
-     */
 
     protected static int tileSize;
 
@@ -25,16 +20,11 @@ public class TileView extends View {
     private static int yOffset;
 
 
-    /**
-     * A hash that maps integer handles specified by the subclasser to the
-     * drawable that will be used for that reference
-     */
+    // tile 을 그릴 array
     private Bitmap[] tileArray;
 
-    /**
-     * A two-dimensional array of integers in which the number represents the
-     * index of the tile that should be drawn at that locations
-     */
+
+    // 각 위치의 인덱스를 저장할 이차원 배열
     private int[][] tileGrid;
 
     private final Paint tilePaint = new Paint();
